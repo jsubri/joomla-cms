@@ -3,18 +3,23 @@
  * @package     Joomla.Plugin
  * @subpackage  Editors-xtd.image
  *
- * @copyright   Copyright (C) 2005 - 2020 Open Source Matters, Inc. All rights reserved.
+ * @copyright   (C) 2006 Open Source Matters, Inc. <https://www.joomla.org>
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
 defined('_JEXEC') or die;
 
+use Joomla\CMS\Factory;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\Object\CMSObject;
+use Joomla\CMS\Plugin\CMSPlugin;
+
 /**
- * Editor Image buton
+ * Editor Image button
  *
  * @since  1.5
  */
-class PlgButtonImage extends JPlugin
+class PlgButtonImage extends CMSPlugin
 {
 	/**
 	 * Load the language file on instantiation.
@@ -31,14 +36,15 @@ class PlgButtonImage extends JPlugin
 	 * @param   string   $asset   The name of the asset being edited.
 	 * @param   integer  $author  The id of the author owning the asset being edited.
 	 *
-	 * @return  JObject  The button options as JObject or false if not allowed
+	 * @return  CMSObject|false
 	 *
 	 * @since   1.5
 	 */
 	public function onDisplay($name, $asset, $author)
 	{
-		$app       = JFactory::getApplication();
-		$user      = JFactory::getUser();
+		$app       = Factory::getApplication();
+		$doc       = $app->getDocument();
+		$user      = Factory::getUser();
 		$extension = $app->input->get('option');
 
 		// For categories we check the extension (ex: component.section)
@@ -57,15 +63,44 @@ class PlgButtonImage extends JPlugin
 			|| (count($user->getAuthorisedCategories($extension, 'core.edit')) > 0)
 			|| (count($user->getAuthorisedCategories($extension, 'core.edit.own')) > 0 && $author === $user->id))
 		{
-			$link = 'index.php?option=com_media&amp;view=images&amp;tmpl=component&amp;e_name=' . $name . '&amp;asset=' . $asset . '&amp;author=' . $author;
+			$doc->getWebAssetManager()
+				->useScript('webcomponent.image-select')
+				->useScript('webcomponent.field-media')
+				->useStyle('webcomponent.image-select');
 
-			$button = new JObject;
+			$doc->addScriptOptions('xtdImageModal', [
+				$name . '_ImageModal'
+			]);
+
+			Text::script('JFIELD_MEDIA_LAZY_LABEL');
+			Text::script('JFIELD_MEDIA_ALT_LABEL');
+			Text::script('JFIELD_MEDIA_ALT_CHECK_LABEL');
+			Text::script('JFIELD_MEDIA_ALT_CHECK_DESC_LABEL');
+			Text::script('JFIELD_MEDIA_CLASS_LABEL');
+			Text::script('JFIELD_MEDIA_FIGURE_CLASS_LABEL');
+			Text::script('JFIELD_MEDIA_FIGURE_CAPTION_LABEL');
+			Text::script('JFIELD_MEDIA_LAZY_LABEL');
+			Text::script('JFIELD_MEDIA_SUMMARY_LABEL');
+
+			$link = 'index.php?option=com_media&view=media&tmpl=component&e_name=' . $name . '&asset=' . $asset . '&author=' . $author;
+
+			$button = new CMSObject;
 			$button->modal   = true;
-			$button->class   = 'btn';
 			$button->link    = $link;
-			$button->text    = JText::_('PLG_IMAGE_BUTTON_IMAGE');
+			$button->text    = Text::_('PLG_IMAGE_BUTTON_IMAGE');
 			$button->name    = 'pictures';
-			$button->options = "{handler: 'iframe', size: {x: 800, y: 500}}";
+			$button->iconSVG = '<svg viewBox="0 0 32 32" width="24" height="24"><path d="M4 8v20h28v-20h-28zM30 24.667l-4-6.667-4.533 3.778-3.46'
+								. '7-5.778-12 10v-16h24v14.667zM8 15c0-1.657 1.343-3 3-3s3 1.343 3 3v0c0 1.657-1.343 3-3 3s-3-1.343-3-3v0zM28 4h-'
+								. '28v20h2v-18h26z"></path></svg>';
+			$button->options = [
+				'height'     => '400px',
+				'width'      => '800px',
+				'bodyHeight' => '70',
+				'modalWidth' => '80',
+				'tinyPath'   => $link,
+				'confirmCallback' => 'Joomla.getImage(Joomla.selectedMediaFile, \'' . $name . '\', this)',
+				'confirmText' => Text::_('PLG_IMAGE_BUTTON_INSERT')
+			];
 
 			return $button;
 		}
