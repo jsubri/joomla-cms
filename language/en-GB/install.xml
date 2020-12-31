@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<extension version="3.9" client="site" type="language" method="upgrade">
+<extension client="site" type="language" method="upgrade">
 	<name>English (en-GB)</name>
 	<tag>en-GB</tag>
+<<<<<<< HEAD
 	<version>3.9.24</version>
 	<creationDate>December 2020</creationDate>
+=======
+	<version>4.0.0</version>
+	<creationDate>October 2020</creationDate>
+>>>>>>> 5ddc984651db52d74ccaac71ab714ffbe101234c
 	<author>Joomla! Project</author>
 	<authorEmail>admin@joomla.org</authorEmail>
 	<authorUrl>www.joomla.org</authorUrl>
-	<copyright>Copyright (C) 2005 - 2020 Open Source Matters. All rights reserved.</copyright>
+	<copyright>(C) 2013 Open Source Matters, Inc.</copyright>
 	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
 	<description>en-GB site language</description>
 	<files>
